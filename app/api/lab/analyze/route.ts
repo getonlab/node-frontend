@@ -22,6 +22,9 @@ YÊU CẦU OUTPUT (BẮT BUỘC):
 2. Gồm 2 phần:
 
 A. preview (ngắn gọn, dùng cho UI):
+- title: tiêu đề ngắn gọn gồm brand-word và tên đề tài, ví dụ "SmartEdu – Hệ thống học tập cá nhân hóa"
+- brand: lấy brand-word từ title, thường là phần đầu, ví dụ "SmartEdu"
+- summary: tóm tắt ngắn gọn (≤ 50 từ) về ý tưởng, tập trung vào điểm khác biệt và giá trị cốt lõi.
 - type: loại sản phẩm (Web / App / AI / Khác)
 - target: đối tượng người dùng chính
 - problem: vấn đề chính (≤ 20 từ)
@@ -30,17 +33,20 @@ A. preview (ngắn gọn, dùng cho UI):
 B. content (markdown):
 - Phân tích chi tiết bằng Markdown, tiếng Việt
 - Gồm các mục:
-  1. Vấn đề thực tế
-  2. Đối tượng người dùng
-  3. Giá trị cốt lõi
-  4. Mức độ khả thi (1–5)
-  5. Phù hợp triển khai trong Lab đại học
+  1. Thực trạng vấn đề (đánh giá 1–10)
+  2. Đối tượng người dùng (đánh giá 1–10)
+  3. Giá trị cốt lõi (đánh giá 1–10)
+  4. Mức độ khả thi (đánh giá 1–10)
+  5. Khả năng triển khai (đánh giá 1–10)
 - Viết ngắn gọn, rõ ràng
 
 FORMAT MẪU:
 
 {
   "preview": {
+    "title": "...",
+    "brand": "...",
+    "summary": "...",
     "type": "...",
     "target": "...",
     "problem": "...",
@@ -67,6 +73,8 @@ FORMAT MẪU:
 
   return NextResponse.json({
     step: "analyze",
+    title: parsed.title ?? "",
+    summary: parsed.summary ?? "",
     preview: parsed.preview ?? null,
     content: parsed.content ?? "",
   });

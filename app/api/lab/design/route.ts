@@ -18,19 +18,50 @@ ${idea}
 Phân tích:
 ${analysis}
 
-Hãy đề xuất:
-1. Các màn hình chính
-2. Layout từng màn hình
-3. UX nổi bật
-4. Phong cách thiết kế
+CHỈ TRẢ VỀ MỘT OBJECT JSON HỢP LỆ.
+KHÔNG markdown.
+KHÔNG \`\`\`.
+KHÔNG text bên ngoài.
 
-KHÔNG vẽ hình. Trình bày rõ ràng.
+JSON phải có đúng cấu trúc sau:
+
+{
+  "preview": {
+    "platform": "web | mobile",
+    "screens": [
+      {
+        "id": "home",
+        "name": "Tên màn hình",
+        "layout": "1 cột | 2 cột",
+        "mainBlocks": ["Header", "Feed"]
+      }
+    ],
+    "uxHighlights": ["tối đa 3 ý"],
+    "style": {
+      "tone": "",
+      "color": "",
+      "font": ""
+    }
+  },
+  "markdown": "Mô tả chi tiết bằng markdown"
+}
 `;
 
-  const result = await callAI(prompt);
+  const raw = await callAI(prompt);
+
+  let parsed;
+  try {
+    parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+  } catch {
+    return NextResponse.json(
+      { error: "AI returned invalid JSON", raw },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({
     step: "design",
-    content: result,
+    content: parsed.markdown,
+    preview: parsed.preview
   });
 }
