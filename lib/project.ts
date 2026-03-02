@@ -1,29 +1,25 @@
-export const projects: Record<string, any> = {
-  shoespot: {
-    slug: "shoespot",
-    title: "ShoeSpot – Nền tảng so sánh giá giày",
-    brand: "ShoeSpot",
+// lib/project.ts
+import { AnalysisPreview, ArchitecturePreview, DesignPreview } from "@/app/previewSections";
 
-    preview: {
-      analysis: {
-        summary: "So sánh giá giày từ nhiều sàn TMĐT",
-        target: "Sinh viên, người mua giày online",
-        problem: "Khó tìm giá tốt",
-        goal: "Mua giày nhanh – đúng giá"
-      }
-    },
+// lib/projects.ts
+export interface Project {
+  slug: string;
+  title: string;
+  brand: string;
 
-    content: {
-      analysis: `
-## Vấn đề thực tế
-Người mua phải kiểm tra nhiều sàn...
+  preview: {
+    analysis?: AnalysisPreview;
+    design?: DesignPreview;
+    architecture?: ArchitecturePreview;
+  };
 
-## Đối tượng
-Sinh viên, người trẻ...
+  content: {
+    analysis?: string;
+    design?: string;
+    architecture?: string;
+  };
 
-## Giá trị cốt lõi
-So sánh nhanh, chính xác
-`
-    }
-  }
-};
+  ownerEmail?: string;
+}
+
+export const projects: Record<string, Project> = {};

@@ -11,13 +11,15 @@ import { AnalysisPreview, AnalysisPreviewSection,
   DesignPreview, DesignPreviewSection,
   ArchitecturePreview, ArchitecturePreviewSection} from "./previewSections";
 import { content } from "@/tailwind.config";
+import { useRouter } from "next/navigation";
+import { Project, projects } from "@/lib/project";
 
 export default function Home() {
   const [idea, setIdea] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const [result, setResult] = useState<{
-    analyze?: string;
+    analysis?: string;
     design?: string;
     architecture?: string;
   }>({});
@@ -50,7 +52,7 @@ export default function Home() {
     }).then((r) => r.json());
 
     setResult(prev => ({ ...prev,
-      analyze: analyzeRes.content,
+      analysis: analyzeRes.content,
     }));
     setPreview(prev => ({ ...prev, analysis: analyzeRes.preview as AnalysisPreview }));
 
@@ -148,25 +150,26 @@ export default function Home() {
     );
   }
 
-  async function handleCreateLab() {
-    const project = {
+  const router = useRouter();
+
+  const handleCreateLab = () => {
+    if (!slug || !preview.analysis) return;
+
+    const project: Project = {
       slug,
-      title: preview.analysis?.title,
-      brand: preview.analysis?.brand,
+      title: preview.analysis.title,
+      brand: preview.analysis.brand,
+
       preview,
       content: result,
+
+      ownerEmail: undefined, // phase sau
     };
 
-    const res = await fetch("/api/lab/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(project),
-    });
+    localStorage.setItem(`lab:${slug}`, JSON.stringify(project));
 
-    if (res.ok) {
-      window.location.href = `/p/${slug}`;
-    }
-  }
+    router.push(`/p/${slug}`);
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
@@ -210,7 +213,7 @@ export default function Home() {
                 <Section
                   title="🔍 Phân tích ý tưởng"
                   loading={loadingStep === "analyzing"}
-                  content={result.analyze}
+                  content={result.analysis}
                 />
 
                 {/* STEP 2 */}
@@ -328,14 +331,14 @@ export default function Home() {
                   🔍 Phân tích ý tưởng
                 </h3>
                 {preview.analysis && <AnalysisPreviewSection preview={preview.analysis} />}
-                {result.analyze &&
+                {result.analysis &&
                   <div className="prose prose-invert prose-slate max-w-none 
                     prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-base
                     prose-h3:text-sm prose-p:text-sm prose-p:leading-relaxed
                     prose-li:text-sm prose-strong:text-white"
                       style={{textAlign: "left"}}>
                     <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-                      {stripMarkdownFence(result.analyze || "")}
+                      {stripMarkdownFence(result.analysis || "")}
                     </ReactMarkdown>
                   </div>
                 }
