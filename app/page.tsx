@@ -180,7 +180,7 @@ export default function Home() {
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-28 pb-24 text-center">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Biến ý tưởng thành Web / App
+          Biến Ý tưởng thành Sản phẩm số
         </h2>
         <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto">
           Lab đổi mới sáng tạo dành cho sinh viên.
