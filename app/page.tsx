@@ -13,6 +13,8 @@ import { AnalysisPreview, AnalysisPreviewSection,
 import { content } from "@/tailwind.config";
 import { useRouter } from "next/navigation";
 import { Project, projects } from "@/lib/project";
+import { ecommerceTemplate } from "./templates/presets";
+import { initProjectTemplate } from "@/lib/initProjectTemplate";
 
 export default function Home() {
   const [idea, setIdea] = useState("");
@@ -155,17 +157,19 @@ export default function Home() {
   const handleCreateLab = () => {
     if (!slug || !preview.analysis) return;
 
-    const project: Project = {
+    let project: Project = {
+      idea: idea,
       slug,
       title: preview.analysis.title,
       brand: preview.analysis.brand,
 
       preview,
       content: result,
-
-      ownerEmail: undefined, // phase sau
     };
 
+    //project = initProjectTemplate(project, "ecommerce"); 
+    // sau này mode có thể do AI hoặc user chọn
+    
     localStorage.setItem(`lab:${slug}`, JSON.stringify(project));
 
     router.push(`/p/${slug}`);
@@ -176,7 +180,7 @@ export default function Home() {
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-28 pb-24 text-center">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Biến ý tưởng thành ứng dụng
+          Biến ý tưởng thành Web / App
         </h2>
         <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto">
           Lab đổi mới sáng tạo dành cho sinh viên.

@@ -6,12 +6,24 @@ import { DesignPreviewSection } from "@/app/previewSections";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-export default function LabClient({ project }: { project: any }) {
+import { TemplateRenderer } from "@/app/templates/TemplateRenderer";
+import { WebsiteConfiguration } from "./WebsiteConfiguration";
+import { Project } from "@/lib/project";
+import { Website } from "@/lib/website";
+import { useRouter } from "next/navigation";
+
+export default function LabClient({ project: initial }: { project: Project }) {
   const [mounted, setMounted] = useState(false);
+  const [project, setProject] = useState<Project>(initial);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  {project.template && (
+    <TemplateRenderer template={project.template} />
+  )}
 
   if (!mounted) return null;
 
@@ -40,6 +52,45 @@ export default function LabClient({ project }: { project: any }) {
     return <div className="p-20">❌ Không tìm thấy Lab trong LabClient</div>;
   }
 
+  function handleGenerateWebsite() {
+    if (!project.slug || !project.template || !project.sectionsDraft) {
+      alert("Thiếu cấu hình website");
+      return;
+    }
+
+    const enabledSections = project.sectionsDraft
+      .filter((d) => d.enabled)
+      .map((d) => d.type);
+
+    const finalTemplate = {
+      ...project.template,
+      sections: project.template.sections.filter((section) =>
+        enabledSections.includes(section.type)
+      ),
+    };
+
+    const website: Website = {
+      slug: project.slug,
+      projectId: project.id,
+      template: finalTemplate,
+      status: "generated",
+      createdAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(`web:${project.slug}`, JSON.stringify(website));
+
+    localStorage.setItem(
+      `lab:${project.slug}`,
+      JSON.stringify({
+        ...project,
+        template: finalTemplate,
+        status: "generated",
+      })
+    );
+
+    router.push(`/web/${project.slug}`);
+  }
+
   return (
     <main className="max-w-5xl mx-auto px-6 py-20 space-y-10">
       <header>
@@ -49,9 +100,10 @@ export default function LabClient({ project }: { project: any }) {
         <p className="text-slate-300 mt-2"> Dự án · <span className="text-emerald-400">{project.brand}</span></p>
       </header>
 
+      {/* ===== A. WEBSITE OVERVIEW ===== */}
       <section className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-600 rounded-2xl p-6 space-y-4 prose-headings:text-white">
         <div>
-            <h2 className="text-lg font-semibold">💡 Tổng quan</h2>
+            <h2 className="text-xl font-semibold text-white mb-6">A. Tổng quan 💡</h2>
             <p className="text-base text-slate-200 leading-relaxed">
             {project.preview?.analysis?.summary}
             </p>
@@ -67,6 +119,44 @@ export default function LabClient({ project }: { project: any }) {
         <div className="pt-4 border-t border-slate-700 text-xs text-slate-400">
             <div>Slug: /p/{project.slug}</div>
             <div>Owner: ẩn</div>
+        </div>
+      </section>
+
+      {/* ===== B. WEBSITE CONFIGURATION ===== */}
+      <WebsiteConfiguration
+        project={project}
+        onChange={(patch) =>
+          setProject((prev) => ({
+            ...prev,
+            ...patch,
+            status: "configured",
+            updatedAt: new Date().toISOString(),
+          }))
+        }
+      />
+
+      <section className="text-center pt-20">
+        <h3 className="text-2xl font-bold">
+            Bạn có thể khởi tạo và phát triển dự án này 🚀
+        </h3>
+
+        <div className="mt-6 flex justify-center gap-4 flex-wrap">
+          <button className="
+            px-6 py-3 rounded-xl
+            bg-emerald-600 hover:bg-emerald-500
+            text-white font-semibold
+            shadow"        
+            onClick={handleGenerateWebsite}>
+            🚀 Tạo website
+          </button>
+
+          <button className="
+            px-6 py-3 rounded-xl
+            bg-slate-700 hover:bg-slate-600
+            text-slate-100
+          ">
+            📤 Chia sẻ
+          </button>
         </div>
       </section>
 
@@ -98,31 +188,6 @@ export default function LabClient({ project }: { project: any }) {
             </ReactMarkdown>
         </article>
       </LabSection>
-
-      <section className="text-center pt-20">
-          <h3 className="text-2xl font-bold">
-              Bạn có thể phát triển dự án này 🚀
-          </h3>
-
-          <div className="mt-6 flex justify-center gap-4 flex-wrap">
-            <button className="
-              px-6 py-3 rounded-xl
-              bg-emerald-600 hover:bg-emerald-500
-              text-white font-semibold
-              shadow
-            ">
-              ✏️ Chỉnh sửa Lab
-            </button>
-
-            <button className="
-              px-6 py-3 rounded-xl
-              bg-slate-700 hover:bg-slate-600
-              text-slate-100
-            ">
-              📤 Chia sẻ
-            </button>
-          </div>
-      </section>
 
     </main>
   );

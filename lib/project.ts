@@ -1,11 +1,28 @@
 // lib/project.ts
 import { AnalysisPreview, ArchitecturePreview, DesignPreview } from "@/app/previewSections";
+import { SectionType, TemplateConfig, TemplateMode } from "./template";
 
-// lib/projects.ts
+export type ProjectStatus =
+  | "draft"
+  | "configured"
+  | "generated"
+  | "published"
+  | "need-support";
+
+export interface SectionDraft {
+  type: SectionType;
+  enabled: boolean;
+  source?: "ai" | "preset" | "user";
+  note?: string;
+}
+
 export interface Project {
-  slug: string;
-  title: string;
-  brand: string;
+  idea: string;
+
+  id?: string;
+  slug?: string;
+  title?: string;
+  brand?: string;
 
   preview: {
     analysis?: AnalysisPreview;
@@ -19,7 +36,22 @@ export interface Project {
     architecture?: string;
   };
 
+  template?: TemplateConfig;
+
+  mode?: TemplateMode;
+  goals?: string[];
+  audience?: string[];
+  tone?: string;
+
   ownerEmail?: string;
+  ownerUserId?: string;
+
+  sectionsDraft?: SectionDraft[];
+
+  status?: ProjectStatus;
+
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const projects: Record<string, Project> = {};
