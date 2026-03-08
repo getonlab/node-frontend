@@ -1,56 +1,33 @@
 // p/[slug]/WebsiteConfiguration.tsx
 "use client";
 
-import { TemplateMode } from "@/lib/template";
+import { TemplateMode, templateModes } from "@/lib/template";
 import { generateSectionsDraft } from "@/lib/generateSectionsDraft";
+import { getOptionsForMode } from "@/lib/modeConfig";
+import { useEffect } from "react";
 import { SectionDraft } from "@/lib/project";
-import { getPresetByMode } from "@/lib/initProjectTemplate";
+import { getPresetByMode } from "@/lib/getPreset";
 
 interface Props {
   project: any;
   onChange: (patch: Partial<any>) => void;
 }
 
-const MODES: TemplateMode[] = [
-  "landing",
-  "businessSite",
-  "service",
-  "portfolio",
-  "resume",
-  "careerProfile",
-  "recruitment",
-  "education",
-  "research",
-  "showcase",
-];
-
-const GOALS = [
-  "Giới thiệu tổ chức",
-  "Tuyển dụng nhân sự",
-  "Xây dựng thương hiệu",
-  "Bán sản phẩm / dịch vụ",
-  "Thu hút cộng đồng",
-];
-
-const AUDIENCE = [
-  "Sinh viên",
-  "Người đi làm",
-  "Doanh nghiệp",
-  "Nhà nghiên cứu",
-  "Cộng đồng",
-];
-
-const TONES = [
-  "Trang trọng – chính thống",
-  "Thân thiện – hiện đại",
-  "Công nghệ – startup",
-  "Học thuật – nghiên cứu",
-  "Truyền cảm hứng",
-];
-
 const inputBase = "w-full rounded-lg px-4 py-2 bg-slate-900 text-slate-100 placeholder-slate-500 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500";
 
 export function WebsiteConfiguration({ project, onChange }: Props) {
+  const currentOptions = getOptionsForMode(project.mode);
+
+  useEffect(() => {
+    // Khi component được tải, nếu project đã có mode nhưng chưa có template,
+    // hãy tự động tạo template và sectionsDraft dựa trên mode đó.
+    if (project.mode && !project.template) {
+      onChange({
+        template: getPresetByMode(project.mode as TemplateMode),
+        sectionsDraft: generateSectionsDraft(project.mode as TemplateMode),
+      });
+    }
+  }, []); // Chạy một lần duy nhất khi component mount
 
   return (
     <section className="mt-12 p-6 rounded-2xl border border-slate-700 bg-slate-900">
@@ -70,7 +47,7 @@ export function WebsiteConfiguration({ project, onChange }: Props) {
             status: "configured", })}
         >
           <option value="">— Chọn loại website —</option>
-          {MODES.map((m) => (
+          {templateModes.map((m) => (
             <option key={m} value={m}>
               {m}
             </option>
@@ -81,7 +58,7 @@ export function WebsiteConfiguration({ project, onChange }: Props) {
       {/* GOALS */}
       <Field label="Primary goals">
         <TagSelector
-          options={GOALS}
+          options={currentOptions.goals}
           value={project.goals || []}
           onChange={(v) => onChange({ goals: v })}
         />
@@ -90,7 +67,7 @@ export function WebsiteConfiguration({ project, onChange }: Props) {
       {/* AUDIENCE */}
       <Field label="Target audience">
         <TagSelector
-          options={AUDIENCE}
+          options={currentOptions.audience}
           value={project.audience || []}
           onChange={(v) => onChange({ audience: v })}
         />
@@ -104,7 +81,7 @@ export function WebsiteConfiguration({ project, onChange }: Props) {
           onChange={(e) => onChange({ tone: e.target.value })}
         >
           <option value="">— Chọn giọng điệu —</option>
-          {TONES.map((t) => (
+          {currentOptions.tones.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>

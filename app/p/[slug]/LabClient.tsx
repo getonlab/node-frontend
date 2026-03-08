@@ -1,7 +1,7 @@
 // app/p/[slug]/LabClient.tsx
 "use client";
 
-import { DesignPreviewSection } from "@/app/previewSections";
+import { ArchitecturePreviewSection, DesignPreviewSection } from "@/app/previewSections";
 //import { projects } from "@/lib/project";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -147,7 +147,7 @@ export default function LabClient({ project: initial }: { project: Project }) {
             text-white font-semibold
             shadow"        
             onClick={handleGenerateWebsite}>
-            🚀 Tạo website
+            🚀 Thiết lập dự án
           </button>
 
           <button className="
@@ -173,20 +173,8 @@ export default function LabClient({ project: initial }: { project: Project }) {
         {project.preview.design && <DesignPreviewSection preview={project.preview.design} />}
       </LabSection>
 
-      <LabSection title="🎨 Phân tích chi tiết UI/UX">
-        <div className="mt-6 prose prose-invert max-w-none">
-            <ReactMarkdown>
-            {project.content.design}
-            </ReactMarkdown>
-        </div>
-      </LabSection>
-
-      <LabSection title="🏗️ Phân tích chi tiết kiến trúc">
-        <article className="prose prose-invert max-w-none">
-            <ReactMarkdown>
-            {project.content.architecture}
-            </ReactMarkdown>
-        </article>
+      <LabSection title="🎨 Thiết kế Kiến trúc">
+        {project.preview.architecture && <ArchitecturePreviewSection preview={project.preview.architecture} />}
       </LabSection>
 
     </main>

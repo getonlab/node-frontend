@@ -7,12 +7,14 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from "remark-gfm";
 import remarkBreaks from 'remark-breaks';
 
-import { AnalysisPreview, AnalysisPreviewSection,
+import { AnalysisPreview, AnalysisPreviewSection, 
   DesignPreview, DesignPreviewSection,
   ArchitecturePreview, ArchitecturePreviewSection} from "./previewSections";
+import { content } from "@/tailwind.config";
 import { useRouter } from "next/navigation";
-import { Project } from "@/lib/project";
-import { TemplateMode } from "@/lib/template";
+import { Project, projects } from "@/lib/project";
+import { ecommerceTemplate } from "./templates/presets";
+//import { initProjectTemplate } from "@/lib/initProjectTemplate";
 
 export default function Home() {
   const [idea, setIdea] = useState("");
@@ -31,7 +33,6 @@ export default function Home() {
   }>({});
 
   const [loadingStep, setLoadingStep] = useState<"idle" | "analyzing" | "designing" | "architecting" | "done">("idle");
-  const [mode, setMode] = useState<TemplateMode>();
 
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -52,16 +53,49 @@ export default function Home() {
       body: JSON.stringify({ idea }),
     }).then((r) => r.json());
 
-    setResult(prev => ({ ...prev, analysis: analyzeRes.content,}));
-    setPreview(prev => ({ ...prev, analysis: analyzeRes.preview.analysis as AnalysisPreview }));
-    setPreview(prev => ({ ...prev, design: analyzeRes.preview.design as DesignPreview  }));
-    setPreview(prev => ({ ...prev, architecture: analyzeRes.preview.architecture as ArchitecturePreview }));    
-    setMode(analyzeRes.mode);
-    
+    setResult(prev => ({ ...prev,
+      analysis: analyzeRes.content,
+    }));
+    setPreview(prev => ({ ...prev, analysis: analyzeRes.preview as AnalysisPreview }));
+
+    // STEP 2 – UI Design
+    setLoadingStep("designing");
+
+    const designRes = await fetch("/api/lab/design", {
+      method: "POST",
+      body: JSON.stringify({
+        idea,
+        analysis: analyzeRes.content,
+       }),
+    }).then((r) => r.json());
+
+    setResult(prev => ({ ...prev,
+      design: designRes.content,
+    }));
+    setPreview(prev => ({ ...prev, design: designRes.preview as DesignPreview  }));
+
+    // STEP 3 – Architecture
+    setLoadingStep("architecting");
+    const archRes = await fetch("/api/lab/architecture", {
+      method: "POST",
+      body: JSON.stringify({
+        idea,
+        analysis: analyzeRes.content,
+        design: designRes.content,
+      }),
+    }).then((r) => r.json());
+
+    setResult(prev => ({ ...prev,
+      architecture: archRes.content,
+    }));
+    setPreview(prev => ({ ...prev, architecture: archRes.preview as ArchitecturePreview }));
+
     setLoadingStep("done");
 
     console.log("LAB RESULT:", {
-      analyzeRes
+      analyzeRes,
+      designRes,
+      archRes,
     });
 
   };
@@ -128,13 +162,12 @@ export default function Home() {
       slug,
       title: preview.analysis.title,
       brand: preview.analysis.brand,
-      mode: mode,
 
       preview,
       content: result,
     };
 
-    //project = initProjectTemplate(project, "ecommerce");
+    //project = initProjectTemplate(project, "ecommerce"); 
     // sau này mode có thể do AI hoặc user chọn
     
     localStorage.setItem(`lab:${slug}`, JSON.stringify(project));
@@ -147,7 +180,7 @@ export default function Home() {
       {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-28 pb-24 text-center">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Từ Ý tưởng đến Sản phẩm số
+          Biến Ý tưởng thành dự án hoặc sản phẩm số
         </h2>
         <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto">
           Lab đổi mới sáng tạo dành cho sinh viên.
@@ -268,7 +301,7 @@ export default function Home() {
                         }
                       `}
                     >
-                      🚀 Tạo dự án
+                      🚀 Tạo trang Lab cho ý tưởng này
                     </button>
 
                     <button
@@ -419,7 +452,69 @@ export default function Home() {
               </h3>
               <div className="mt-6 flex justify-center gap-4 flex-wrap">
                 <button className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
-                  🚀 Tạo dự án
+                  🚀 Tạo trang Lab cho ý tưởng này
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIdea("");
+                    setSubmitted(false);
+                  }}
+                  className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700"
+                >
+                  Thử ý tưởng khác
+                </button>
+              </div>
+              <p className="mt-3 text-sm text-slate-400">
+                Lưu lại & triển khai thật cho dự án của bạn!
+              </p>
+            </div>
+          )}
+          
+          {/* DETAILS */}
+          <section className="max-w-6xl mx-auto px-6 pt-28 pb-24 text-center">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6"> 
+              {result.design &&
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">Chi tiết Thiết kế</h3>
+                  <div className="prose prose-invert prose-slate max-w-none 
+                    prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl
+                    prose-p:text-slate-300 prose-strong:text-white
+                    prose-li:text-slate-300"  style={{textAlign: "left"}}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                      {stripMarkdownFence(result.design)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+          <section className="max-w-6xl mx-auto px-6 pt-28 pb-24 text-center">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6"> 
+              {result.architecture &&
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">Chi tiết Kiến trúc</h3>
+                  <div className="prose prose-invert prose-slate max-w-none 
+                    prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl
+                    prose-p:text-slate-300 prose-strong:text-white
+                    prose-li:text-slate-300"  style={{textAlign: "left"}}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                      {stripMarkdownFence(result.architecture)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+
+          {loadingStep === "done" && (
+            <div className="mt-20 text-center">
+              <h3 className="text-2xl font-bold">
+                Mỗi ý tưởng đều xứng đáng được thử
+              </h3>
+              <div className="mt-6 flex justify-center gap-4 flex-wrap">
+                <button className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold">
+                  🚀 Tạo trang Lab cho ý tưởng này
                 </button>
 
                 <button

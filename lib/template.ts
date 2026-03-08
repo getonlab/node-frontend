@@ -1,24 +1,27 @@
 // lib/template.ts
-export type TemplateMode =
-  | "ecommerce"
-  | "dashboard"
-  | "lab"
-  | "gov"
-  | "landing"
-  | "businessSite"
-  | "service"
-  | "admin"
-  | "education"
-  | "portfolio"
-  | "marketplace"
-  | "aiApp"
-  | "developerTool"
-  | "digitalService"
-  | "research"
-  | "showcase"
-  | "resume"
-  | "careerProfile"
-  | "recruitment";
+export const templateModes = [
+  "ecommerce",
+  "dashboard",
+  "lab",
+  "gov",
+  "landing",
+  "businessSite",
+  "service",
+  "admin",
+  "education",
+  "portfolio",
+  "marketplace",
+  "aiApp",
+  "developerTool",
+  "digitalService",
+  "research",
+  "showcase",
+  "resume",
+  "careerProfile",
+  "recruitment",
+] as const;
+
+export type TemplateMode = (typeof templateModes)[number];
 
 export type SectionType =
   | "hero"
@@ -80,4 +83,3 @@ export interface SectionConfig {
   type: SectionType;
   data: Record<string, any>;
 }
-
