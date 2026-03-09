@@ -28,6 +28,11 @@ Về tầm nhìn dài hạn, geton có thể trở thành một AI Product Lab d
 
 Một số công đoạn quan trọng:
 1. Tạo Repository trên GitHub từ Template
+    1.1 Frontend gửi yêu cầu
+    1.2 Backend tiếp nhận và xác thực
+    1.3 Backend gọi GitHub API
+    1.4 GitHub thực hiện tạo Repository
+    1.5 Backend nhận kết quả và lưu vào Registry
 2. Kích hoạt CI/CD để triển khai lần đầu lên Cloud Run
 3. Gán Subdomain cho Cloud Run Service
 4. Lưu thông tin vào Registry Database
