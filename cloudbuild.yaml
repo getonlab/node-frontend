@@ -31,7 +31,20 @@ steps:
     - '--allow-unauthenticated'
     - '--quiet'
 
-# Bước 4: Deploy lên Firebase Hosting (tích hợp từ yêu cầu trước)
+# Bước 4: Cập nhật firebase.json để trỏ đến revision mới nhất của Cloud Run
+# Sử dụng jq để sửa đổi file JSON.
+- name: 'gcr.io/cloud-builders/jq'
+  id: UpdateFirebaseConfig
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      # Lấy revision mới nhất từ service 'geton-main'
+      LATEST_REVISION=$$(gcloud run services describe geton-main --platform=managed --region=asia-southeast1 --format='value(status.latestReadyRevisionName)')
+      # Cập nhật trường 'run.revision' trong firebase.json
+      jq --arg rev "$$LATEST_REVISION" '.hosting.rewrites[0].run.revision = $$rev' firebase.json > firebase.json.tmp && mv firebase.json.tmp firebase.json
+
+# Bước 5: Deploy lên Firebase Hosting với cấu hình đã được cập nhật
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'firebase'
   args:

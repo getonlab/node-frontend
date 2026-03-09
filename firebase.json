@@ -1,12 +1,18 @@
 {
   "hosting": {
     "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
       {
         "source": "**",
         "run": {
           "serviceId": "geton-main",
-          "region": "asia-southeast1"
+          "region": "asia-southeast1",
+          "revision": "LATEST" 
         }
       }
     ]
